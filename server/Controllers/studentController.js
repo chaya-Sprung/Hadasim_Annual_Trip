@@ -3,21 +3,38 @@ const studentService = require('../Services/studentService');
 const registerStudent = async (req, res) => {
     try {
         await studentService.registerStudent(req.body);
-        res.status(201).json({ message: "התלמידה נוספה בהצלחה!" });
-    } catch (err) {
-        res.status(400).json({ error: err.message });
+        res.status(201).json({ success: true, message: "התלמידה נרשמה בהצלחה" });
+    } catch (error) {
+        res.status(400).json({ success: false, error: error.message });
     }
 };
 
-const getMyStudents = async (req, res) => {
+const getAllStudents = async (req, res) => {
     try {
-        // נניח שהלקוח שולח לנו את שם הכיתה בכתובת או בפרמטר
-        const className = req.query.className; 
-        const students = await studentService.getStudentsForTeacher(className);
-        res.status(200).json(students);
-    } catch (err) {
-        res.status(500).json({ error: "שגיאה בשליפת התלמידות" });
+        const students = await studentService.getAllStudents();
+        res.json(students);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 };
 
-module.exports = { registerStudent, getMyStudents };
+const getStudentsByClass = async (req, res) => {
+    try {
+        const { className } = req.params;
+        const students = await studentService.getStudentsByClass(className);
+        res.json(students);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+const getLocations = async (req, res) => {
+    try {
+        const locations = await studentService.getLastLocations();
+        res.json(locations);
+    } catch (error) {
+        console.error("Controller Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = { registerStudent, getAllStudents, getStudentsByClass, getLocations };

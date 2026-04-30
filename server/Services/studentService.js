@@ -1,23 +1,17 @@
-const studentRepo = require('../Repositories/studentRepository');
+const studentRepository = require('../Repositories/studentRepository');
 
 const registerStudent = async (studentData) => {
-    // בדיקת תקינות בסיסית
-    if (!studentData.firstName || !studentData.lastName) {
-        throw new Error("שם פרטי ושם משפחה הם שדות חובה");
-    }
-    return await studentRepo.addStudent(studentData);
+    return await studentRepository.registerStudent(studentData);
 };
 
-// לוגיקה חשובה: קבלת תלמידות לפי הרשאה של מורה
-const getStudentsForTeacher = async (teacherClass) => {
-    // כאן ה-Service מוודא שאנחנו פונים ל-Repo עם הכיתה הנכונה
-    const students = await studentRepo.getStudentsByClass(teacherClass);
-    
-    if (students.length === 0) {
-        console.log(`לא נמצאו תלמידות בכיתה ${teacherClass}`);
-    }
-    
-    return students;
+const getAllStudents = async () => {
+    return await studentRepository.getAllStudents();
 };
 
-module.exports = { registerStudent, getStudentsForTeacher };
+const getStudentsByClass = async (className) => {
+    return await studentRepository.getStudentsByClass(className);
+};
+const getLastLocations = async () => {
+    return await studentRepository.getLastLocations();
+};
+module.exports = { registerStudent, getAllStudents, getStudentsByClass, getLastLocations  };

@@ -1,33 +1,39 @@
 const express = require('express');
 const cors = require('cors');
-const { poolPromise } = require('./db'); // החיבור ל-DB
-
-// ייבוא הנתיבים (Routes) מהשכבה שבנינו
+const { poolPromise } = require('./db');
 const teacherRoutes = require('./Routes/teacherRoutes');
 const studentRoutes = require('./Routes/studentRoutes');
-
 const app = express();
-
-// --- Middlewares ---
 app.use(cors());
-app.use(express.json()); // קריטי: מאפשר לשרת לקרוא את הנתונים (JSON) שנשלח מה-React
-
-// --- בדיקת חיבור ל-DB ---
-poolPromise.then(() => {
-    console.log("Success! The server is linked to your SSMS database.");
-}).catch(err => {
-    console.error("Database connection failed:", err);
+app.use(express.json());
+app.use('/api/teachers', teacherRoutes);
+app.use('/api/students', studentRoutes);
+app.use((err, req, res, next) => {
+    console.error("🔥 Error caught in Global Handler:", err.stack);
+    const statusCode = err.status || 500;
+    res.status(statusCode).json({
+        success: false,
+        message: "אופס! קרתה שגיאה בשרת",
+        error: err.message
+    });
 });
 
-// --- חיבור ה-Routes (השילוט) ---
-// כל מה שקשור למורות יתחיל בכתובת /api/teachers
-app.use('/api/teachers', teacherRoutes);
+poolPromise.then(() => {
+    console.log("✅ Success! Linked to SSMS database.");
+}).catch(err => {
+    console.error("❌ Database connection failed:", err);
+});
 
-// כל מה שקשור לתלמידות יתחיל בכתובת /api/students
-app.use('/api/students', studentRoutes);
-
-// --- הרצת השרת ---
 const PORT = 5000;
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
+const studentRepository = require('./Repositories/studentRepository');
+setInterval(async () => {
+    try {
+        await studentRepository.simulateMovement();
+    } catch (err) {
+        console.error("Error in simulation:", err);
+    }
+}, 60000);

@@ -1,4 +1,4 @@
-const sql = require('mssql'); //אומר לו להשתמש בספריית mssql כדי להתחבר למסד הנתונים        
+const sql = require('mssql'); 
 
 const config = {
     user: 'sa', 

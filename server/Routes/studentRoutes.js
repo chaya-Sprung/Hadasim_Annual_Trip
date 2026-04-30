@@ -2,10 +2,8 @@ const express = require('express');
 const router = express.Router();
 const studentController = require('../Controllers/studentController');
 
-// כתובת לרישום: /api/students/register
 router.post('/register', studentController.registerStudent);
-
-// כתובת לשליפה עבור המורה: /api/students/my-class
-router.get('/my-class', studentController.getMyStudents);
-
+router.get('/class/:className', studentController.getStudentsByClass);
+router.get('/', studentController.getAllStudents); 
+router.get('/locations', studentController.getLocations);
 module.exports = router;

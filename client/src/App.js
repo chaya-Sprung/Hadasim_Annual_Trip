@@ -1,91 +1,55 @@
 import React, { useState } from 'react';
-import { getMyStudents, registerStudent } from './services/api';
-
+import axios from 'axios';
+import TeacherDashboard from './components/TeacherDashboard';
+import { Input, Button, Card, Typography, Space, message } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
+import './styles/global.css'; 
+const { Title } = Typography;
 function App() {
-  // State עבור החיפוש
-  const [searchClass, setSearchClass] = useState('');
-  const [students, setStudents] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [teacherData, setTeacherData] = useState(null);
+  const [idInput, setIdInput] = useState('');
 
-  // State עבור טופס ההוספה
-  const [newStudent, setNewStudent] = useState({
-    id: '',
-    firstName: '',
-    lastName: '',
-    className: ''
-  });
-
-  // פונקציה לשליפת נתונים
-  const handleSearch = async () => {
+  const handleLogin = async () => {
     try {
-      const response = await getMyStudents(searchClass);
-      setStudents(response.data);
+      const response = await axios.post('http://localhost:5000/api/teachers/login', { id: idInput });
+      if (response.data.success) {
+        setTeacherData(response.data.teacher);
+        setIsLoggedIn(true);
+        message.success("התחברת בהצלחה!");
+      }
     } catch (err) {
-      alert("שגיאה בשליפת נתונים");
-    }
+message.error("כניסה נכשלה: המורה לא קיימת במערכת");    }
   };
-
-  // פונקציה להוספת נתונים
-  const handleAddStudent = async (e) => {
-    e.preventDefault();
-    try {
-      await registerStudent(newStudent);
-      alert("התלמידה נרשמה בהצלחה!");
-      // איפוס הטופס
-      setNewStudent({ id: '', firstName: '', lastName: '', className: '' });
-    } catch (err) {
-      alert("שגיאה ברישום: " + (err.response?.data?.error || err.message));
-    }
-  };
+ if (!isLoggedIn) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f0f2f5' }}>
+      <Card style={{ width: 400, textAlign: 'center', borderRadius: '15px' }}>
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <Title level={2}>כניסת מורות</Title>
+          
+          <Input 
+            size="large" 
+            placeholder="תעודת זהות" 
+            prefix={<UserOutlined />} 
+            value={idInput}
+            onChange={(e) => setIdInput(e.target.value)}
+          />
+          
+          <Button type="primary" size="large" block onClick={handleLogin}>
+            כניסה
+          </Button>
+        </Space>
+      </Card>
+    </div>
+  );
+}
 
   return (
-    <div style={{ padding: '20px', direction: 'rtl', fontFamily: 'Arial' }}>
-      <h1>מערכת ניהול טיול שנתי</h1>
-
-      {/* חלק 1: טופס הוספת תלמידה */}
-      <div style={{ backgroundColor: '#f4f4f4', padding: '15px', borderRadius: '8px' }}>
-        <h3>רישום תלמידה חדשה</h3>
-        <form onSubmit={handleAddStudent}>
-          <input placeholder="תעודת זהות" value={newStudent.id} onChange={(e) => setNewStudent({...newStudent, id: e.target.value})} />
-          <input placeholder="שם פרטי" value={newStudent.firstName} onChange={(e) => setNewStudent({...newStudent, firstName: e.target.value})} />
-          <input placeholder="שם משפחה" value={newStudent.lastName} onChange={(e) => setNewStudent({...newStudent, lastName: e.target.value})} />
-          <input placeholder="כיתה" value={newStudent.className} onChange={(e) => setNewStudent({...newStudent, className: e.target.value})} />
-          <button type="submit">רשמי לטיול</button>
-        </form>
-      </div>
-
-      <hr />
-
-      {/* חלק 2: חיפוש והצגת תלמידות */}
-      <div>
-        <h3>חיפוש תלמידות לפי כיתה</h3>
-        <input 
-          placeholder="הזיני שם כיתה (למשל: ח1)" 
-          value={searchClass}
-          onChange={(e) => setSearchClass(e.target.value)}
-        />
-        <button onClick={handleSearch}>הצג רשימה</button>
-      </div>
-
-      <table border="1" style={{ width: '100%', marginTop: '20px', textAlign: 'right' }}>
-        <thead>
-          <tr style={{ backgroundColor: '#ddd' }}>
-            <th>תעודת זהות</th>
-            <th>שם פרטי</th>
-            <th>שם משפחה</th>
-            <th>כיתה</th>
-          </tr>
-        </thead>
-        <tbody>
-          {students.map(s => (
-            <tr key={s.StudentID}>
-              <td>{s.StudentID}</td>
-              <td>{s.FirstName}</td>
-              <td>{s.LastName}</td>
-              <td>{s.ClassName}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div style={{ direction: 'rtl', padding: '20px' }}>
+      <h2>שלום המורה, {teacherData.FirstName}</h2>
+<TeacherDashboard teacherData={teacherData} />
+      <button onClick={() => setIsLoggedIn(false)}>התנתקות</button>
     </div>
   );
 }
